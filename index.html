@@ -19,28 +19,38 @@
       <div class="stat" id="ui-country-stat"><span class="icon">🏛️</span><span id="ui-country">-</span></div>
       <div class="stat"><span class="icon">💰</span><span id="ui-gold">0</span></div>
       <div class="stat"><span class="icon">🏙️</span><span id="ui-cities">0</span></div>
+      <button id="btn-menu" aria-label="Menu">☰</button>
     </header>
 
     <div id="map-container">
       <svg id="map" viewBox="0 0 1000 850" preserveAspectRatio="xMidYMid meet">
         <defs>
-          <radialGradient id="sea-grad" cx="50%" cy="50%" r="80%">
-            <stop offset="0%" stop-color="#1c2a44"/>
-            <stop offset="100%" stop-color="#080d18"/>
+          <radialGradient id="sea-grad" cx="50%" cy="50%" r="85%">
+            <stop offset="0%" stop-color="#1c3050"/>
+            <stop offset="60%" stop-color="#0e1a2e"/>
+            <stop offset="100%" stop-color="#050811"/>
           </radialGradient>
-          <pattern id="sea-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            <rect width="40" height="40" fill="url(#sea-grad)"/>
+          <pattern id="sea-waves" x="0" y="0" width="60" height="40" patternUnits="userSpaceOnUse">
+            <path d="M0,20 Q15,12 30,20 T60,20" stroke="rgba(120,160,200,0.06)" fill="none" stroke-width="1"/>
+            <path d="M0,32 Q15,24 30,32 T60,32" stroke="rgba(120,160,200,0.04)" fill="none" stroke-width="1"/>
           </pattern>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="2" result="b"/>
             <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
-          <filter id="drop">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.6"/>
+          <filter id="land-tex" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="2" result="noise"/>
+            <feColorMatrix in="noise" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.08 0"/>
+            <feComposite in2="SourceGraphic" operator="in"/>
+            <feComposite in="SourceGraphic" operator="over"/>
           </filter>
+          <clipPath id="viewport-clip">
+            <rect x="0" y="0" width="1000" height="850"/>
+          </clipPath>
         </defs>
         <rect width="1000" height="850" fill="url(#sea-grad)"/>
-        <g id="layer-camera">
+        <rect width="1000" height="850" fill="url(#sea-waves)"/>
+        <g id="layer-camera" clip-path="url(#viewport-clip)">
           <g id="layer-countries"></g>
           <g id="layer-connections"></g>
           <g id="layer-cities"></g>
@@ -82,8 +92,8 @@
     <div id="toast" class="toast hidden"></div>
   </div>
 
-  <script src="data/europe.js"></script>
-  <script src="data/world.js"></script>
-  <script src="game.js"></script>
+  <script src="data/europe.js?v=3"></script>
+  <script src="data/world.js?v=3"></script>
+  <script src="game.js?v=3"></script>
 </body>
 </html>

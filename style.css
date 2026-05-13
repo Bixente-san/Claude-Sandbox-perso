@@ -29,13 +29,70 @@ html, body {
 /* ============ TOP BAR ============ */
 #topbar {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr 1fr 1fr 1fr 36px;
   gap: 2px;
   padding: 8px 6px;
   background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
   border-bottom: 1px solid #2a2a4e;
   flex-shrink: 0;
   padding-top: max(8px, env(safe-area-inset-top));
+  align-items: center;
+}
+
+#btn-menu {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #2a2a4e;
+  color: white;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  flex: none;
+  padding: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#btn-menu:active { background: #1a1a3e; transform: scale(0.95); }
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.menu-list button {
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  background: #16213e;
+  border: 1px solid #2a2a4e;
+  border-radius: 8px;
+}
+
+.menu-list button:active { background: #1a2540; }
+
+.help-section {
+  background: #0f1424;
+  border: 1px solid #2a2a4e;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.help-section h3 {
+  font-size: 13px;
+  color: #f5a623;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+.help-section p {
+  font-size: 12px;
+  color: #c0c0d0;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .stat {
@@ -97,14 +154,28 @@ html, body {
 
 /* ============ COUNTRY SHAPES ============ */
 .country {
-  stroke: #0a0e1c;
-  stroke-width: 0.7;
+  stroke: rgba(20, 28, 44, 0.85);
+  stroke-width: 1.1;
   stroke-linejoin: round;
-  transition: fill 0.25s, opacity 0.15s;
+  transition: fill 0.3s ease;
 }
 
 .country.dim {
   opacity: 0.7;
+}
+
+.sea-label {
+  fill: rgba(140, 175, 215, 0.45);
+  font-size: 11px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: 2px;
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.3);
+  stroke-width: 0.5;
+  text-transform: uppercase;
 }
 
 /* ============ CITIES ============ */
@@ -112,64 +183,69 @@ html, body {
   cursor: pointer;
 }
 
-.city-bg {
-  fill: white;
-  stroke: #0a0e1c;
-  stroke-width: 1.5;
+.city-shadow {
+  fill: rgba(0, 0, 0, 0.55);
 }
 
-.city-fill {
-  stroke: white;
+.city-ring {
+  fill: rgba(0, 0, 0, 0.65);
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 1.6;
+}
+
+.city.capital .city-ring {
+  stroke: gold;
   stroke-width: 2;
 }
 
-.city.capital .city-fill {
-  stroke-width: 3;
+.city-fill {
+  stroke: none;
+  pointer-events: none;
 }
 
-.city.selected .city-fill {
-  stroke: #f5a623;
-  stroke-width: 4;
+.city.selected .city-ring {
+  stroke: #ffb347;
+  stroke-width: 3;
   filter: url(#glow);
 }
 
-.city.reachable .city-fill {
-  stroke: #5cb85c;
-  stroke-width: 3;
+.city.reachable .city-ring {
+  stroke: #66dd66;
+  stroke-width: 2.5;
 }
 
-.city.attackable .city-fill {
-  stroke: #d9534f;
-  stroke-width: 3;
+.city.attackable .city-ring {
+  stroke: #ee5555;
+  stroke-width: 2.5;
 }
 
 .city-army-count {
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 800;
   fill: white;
   text-anchor: middle;
   dominant-baseline: central;
   pointer-events: none;
   paint-order: stroke;
-  stroke: rgba(0,0,0,0.85);
+  stroke: rgba(0,0,0,0.95);
   stroke-width: 3;
   stroke-linejoin: round;
 }
 
 .city-label {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 700;
   fill: white;
   text-anchor: middle;
   pointer-events: none;
   paint-order: stroke;
-  stroke: rgba(0,0,0,0.88);
-  stroke-width: 3.5;
+  stroke: rgba(0,0,0,0.9);
+  stroke-width: 3;
   stroke-linejoin: round;
 }
 
 .city-label.capital {
-  font-size: 19px;
+  font-size: 14px;
 }
 
 .capital-star {
