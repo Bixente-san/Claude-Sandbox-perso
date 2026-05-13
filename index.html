@@ -7,7 +7,6 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Europa Conquest - Jeu de stratégie mobile">
   <title>Europa Conquest</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
@@ -19,40 +18,59 @@
       <div class="stat"><span class="icon">📅</span><span id="ui-turn">T1</span></div>
       <div class="stat" id="ui-country-stat"><span class="icon">🏛️</span><span id="ui-country">-</span></div>
       <div class="stat"><span class="icon">💰</span><span id="ui-gold">0</span></div>
-      <div class="stat"><span class="icon">🗺️</span><span id="ui-territories">0</span></div>
+      <div class="stat"><span class="icon">🏙️</span><span id="ui-cities">0</span></div>
     </header>
 
     <div id="map-container">
-      <svg id="map" viewBox="0 0 600 850" preserveAspectRatio="xMidYMid meet">
+      <svg id="map" viewBox="0 0 1000 850" preserveAspectRatio="xMidYMid meet">
         <defs>
           <radialGradient id="sea-grad" cx="50%" cy="50%" r="80%">
-            <stop offset="0%" stop-color="#1a2842"/>
-            <stop offset="100%" stop-color="#0a0e1c"/>
+            <stop offset="0%" stop-color="#1c2a44"/>
+            <stop offset="100%" stop-color="#080d18"/>
           </radialGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="blur"/>
-            <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
+          <pattern id="sea-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <rect width="40" height="40" fill="url(#sea-grad)"/>
+          </pattern>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="drop">
+            <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.6"/>
           </filter>
         </defs>
-        <rect width="600" height="850" fill="url(#sea-grad)"/>
-        <g id="layer-connections"></g>
-        <g id="layer-territories"></g>
-        <g id="layer-labels"></g>
-        <g id="layer-fx"></g>
+        <rect width="1000" height="850" fill="url(#sea-grad)"/>
+        <g id="layer-camera">
+          <g id="layer-countries"></g>
+          <g id="layer-connections"></g>
+          <g id="layer-cities"></g>
+          <g id="layer-labels"></g>
+          <g id="layer-fx"></g>
+        </g>
       </svg>
-      <div id="map-hint" class="hint hidden"></div>
+      <div id="zoom-controls">
+        <button id="btn-zoom-in" aria-label="zoom in">+</button>
+        <button id="btn-zoom-out" aria-label="zoom out">−</button>
+        <button id="btn-zoom-reset" aria-label="reset zoom">⊙</button>
+      </div>
     </div>
 
     <div id="bottom-panel">
-      <div id="info-panel">
-        <h2 id="ui-selected-name">Sélectionnez un territoire</h2>
-        <div id="ui-selected-stats"></div>
+      <div id="city-info">
+        <div id="ui-selected-header">
+          <span id="ui-selected-name">Touchez une ville</span>
+          <span id="ui-selected-flag"></span>
+        </div>
+        <div id="ui-garrison">
+          <div class="unit-cell" data-unit="inf"><span class="u-icon">👥</span><span class="u-count" id="g-inf">0</span></div>
+          <div class="unit-cell" data-unit="tank"><span class="u-icon">⚙️</span><span class="u-count" id="g-tank">0</span></div>
+          <div class="unit-cell" data-unit="art"><span class="u-icon">💥</span><span class="u-count" id="g-art">0</span></div>
+          <div class="unit-cell" data-unit="air"><span class="u-icon">✈️</span><span class="u-count" id="g-air">0</span></div>
+        </div>
+        <div id="ui-hint">Choisissez votre pays pour commencer.</div>
       </div>
       <div id="actions">
-        <button id="btn-recruit" disabled>Recruter (10💰)</button>
+        <button id="btn-recruit" disabled>Recruter</button>
         <button id="btn-end-turn">Fin du tour</button>
       </div>
     </div>
@@ -64,6 +82,8 @@
     <div id="toast" class="toast hidden"></div>
   </div>
 
+  <script src="data/europe.js"></script>
+  <script src="data/world.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
