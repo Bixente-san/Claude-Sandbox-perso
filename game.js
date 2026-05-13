@@ -15,47 +15,48 @@ const UNIT_TYPES = {
 };
 const UNIT_ORDER = ['inf', 'tank', 'art', 'air'];
 
+// Palette : tons terreux et désaturés pour un rendu carte ancienne / topographique
 const COUNTRIES = {
-  fr:      { name: 'France',     color: '#2b6cb0', short: 'FR' },
-  de:      { name: 'Allemagne',  color: '#4a5468', short: 'DE' },
-  uk:      { name: 'R-U',        color: '#c53030', short: 'UK' },
-  it:      { name: 'Italie',     color: '#2f855a', short: 'IT' },
-  sp:      { name: 'Espagne',    color: '#d69e2e', short: 'ES' },
-  ru:      { name: 'URSS',       color: '#822727', short: 'RU' },
-  tu:      { name: 'Turquie',    color: '#6b46c1', short: 'TR' },
-  // Neutres (chacun sa teinte pour la lisibilité de la carte)
-  ir: { name: 'Irlande',     color: '#3f7a4e' },
-  pt: { name: 'Portugal',    color: '#b85c00' },
-  ch: { name: 'Suisse',      color: '#a04040' },
-  at: { name: 'Autriche',    color: '#a0a040' },
-  nl: { name: 'Pays-Bas',    color: '#dd6b20' },
-  be: { name: 'Belgique',    color: '#9c4221' },
-  lu: { name: 'Luxembourg',  color: '#7a6a30' },
-  dk: { name: 'Danemark',    color: '#b03030' },
-  no: { name: 'Norvège',     color: '#3a5070' },
-  sw: { name: 'Suède',       color: '#2c5282' },
-  fi: { name: 'Finlande',    color: '#4a6080' },
-  is: { name: 'Islande',     color: '#5a7a8a' },
-  pl: { name: 'Pologne',     color: '#a04040' },
-  cz: { name: 'Tchéquie',    color: '#806030' },
-  sk: { name: 'Slovaquie',   color: '#605040' },
-  hu: { name: 'Hongrie',     color: '#a0584a' },
-  hr: { name: 'Croatie',     color: '#a05050' },
-  si: { name: 'Slovénie',    color: '#808040' },
-  rs: { name: 'Serbie',      color: '#7a4a2a' },
-  ba: { name: 'Bosnie',      color: '#6a5a4a' },
-  me: { name: 'Monténégro',  color: '#5a4a4a' },
-  mk: { name: 'Macédoine',   color: '#806840' },
-  al: { name: 'Albanie',     color: '#604030' },
-  bu: { name: 'Bulgarie',    color: '#8a5a30' },
-  ro: { name: 'Roumanie',    color: '#9a6a3a' },
-  gr: { name: 'Grèce',       color: '#3070a0' },
-  ee: { name: 'Estonie',     color: '#4a6070' },
-  lv: { name: 'Lettonie',    color: '#506070' },
-  lt: { name: 'Lituanie',    color: '#5a6070' },
-  md: { name: 'Moldavie',    color: '#806a4a' },
+  fr:      { name: 'France',     color: '#5a7da0', short: 'FR' },
+  de:      { name: 'Allemagne',  color: '#6e6e7e', short: 'DE' },
+  uk:      { name: 'R-U',        color: '#a05858', short: 'UK' },
+  it:      { name: 'Italie',     color: '#7a9c6e', short: 'IT' },
+  sp:      { name: 'Espagne',    color: '#b89548', short: 'ES' },
+  ru:      { name: 'URSS',       color: '#9c5040', short: 'RU' },
+  tu:      { name: 'Turquie',    color: '#8a6aa8', short: 'TR' },
+  // Neutres : ocres/sables/olives variés mais sourds
+  ir: { name: 'Irlande',     color: '#7a9070' },
+  pt: { name: 'Portugal',    color: '#b07852' },
+  ch: { name: 'Suisse',      color: '#988470' },
+  at: { name: 'Autriche',    color: '#a09478' },
+  nl: { name: 'Pays-Bas',    color: '#a87a52' },
+  be: { name: 'Belgique',    color: '#9a6a52' },
+  lu: { name: 'Luxembourg',  color: '#8a7a5a' },
+  dk: { name: 'Danemark',    color: '#a47878' },
+  no: { name: 'Norvège',     color: '#708898' },
+  sw: { name: 'Suède',       color: '#7a92a8' },
+  fi: { name: 'Finlande',    color: '#8298a8' },
+  is: { name: 'Islande',     color: '#8a9aa2' },
+  pl: { name: 'Pologne',     color: '#a08068' },
+  cz: { name: 'Tchéquie',    color: '#988868' },
+  sk: { name: 'Slovaquie',   color: '#88785a' },
+  hu: { name: 'Hongrie',     color: '#a87862' },
+  hr: { name: 'Croatie',     color: '#a08068' },
+  si: { name: 'Slovénie',    color: '#988a6a' },
+  rs: { name: 'Serbie',      color: '#947050' },
+  ba: { name: 'Bosnie',      color: '#88785a' },
+  me: { name: 'Monténégro',  color: '#806e58' },
+  mk: { name: 'Macédoine',   color: '#988868' },
+  al: { name: 'Albanie',     color: '#806852' },
+  bu: { name: 'Bulgarie',    color: '#a88a5a' },
+  ro: { name: 'Roumanie',    color: '#a88a6a' },
+  gr: { name: 'Grèce',       color: '#6a8aa0' },
+  ee: { name: 'Estonie',     color: '#7a8a98' },
+  lv: { name: 'Lettonie',    color: '#80909a' },
+  lt: { name: 'Lituanie',    color: '#86949c' },
+  md: { name: 'Moldavie',    color: '#988a6a' },
   // Owner spécial
-  neutral: { name: 'Neutre', color: '#5a6478' },
+  neutral: { name: 'Neutre', color: '#7a8092' },
 };
 
 const PLAYABLE = ['fr', 'de', 'uk', 'it', 'sp', 'ru', 'tu'];
@@ -572,6 +573,7 @@ const ui = {
 
     document.getElementById('btn-recruit').addEventListener('click', () => this.onRecruit());
     document.getElementById('btn-end-turn').addEventListener('click', () => this.onEndTurn());
+    document.getElementById('btn-menu').addEventListener('click', () => this.showMenu());
 
     // Tap on background to deselect
     const svg = document.getElementById('map');
@@ -583,6 +585,57 @@ const ui = {
     });
   },
 
+  showMenu() {
+    this.showModal(`
+      <h1>Menu</h1>
+      <div class="menu-list">
+        <button id="m-new">🆕 Nouvelle partie</button>
+        <button id="m-help">📖 Comment jouer</button>
+        <button id="m-close" style="background:#444;color:#fff;text-align:center">Fermer</button>
+      </div>
+    `);
+    document.getElementById('m-new').addEventListener('click', () => {
+      this.hideModal();
+      initState();
+      state.phase = 'choose';
+      camera.reset();
+      this.refresh();
+      this.showCountrySelect();
+    });
+    document.getElementById('m-help').addEventListener('click', () => this.showHelp());
+    document.getElementById('m-close').addEventListener('click', () => this.hideModal());
+  },
+
+  showHelp() {
+    this.showModal(`
+      <h1>Comment jouer</h1>
+      <div class="help-section">
+        <h3>🎯 Objectif</h3>
+        <p>Capturez toutes les capitales ennemies (★) ou contrôlez 60 % des villes d'Europe. Si votre capitale tombe, c'est la défaite.</p>
+      </div>
+      <div class="help-section">
+        <h3>🏙️ Villes</h3>
+        <p>Chaque ville abrite une garnison composite (👥 infanterie, ⚙️ blindés, 💥 artillerie, ✈️ aviation). Touchez une ville pour voir sa composition. Chaque ville peut produire 1 unité ET effectuer 1 action par tour.</p>
+      </div>
+      <div class="help-section">
+        <h3>⚔️ Mouvement & combat</h3>
+        <p>Sélectionnez une ville à vous, puis touchez une ville voisine — verte (ami) ou rouge (ennemi). Choisissez la composition à envoyer via les curseurs. Les attaques bénéficient de l'effet de surprise des blindés et de l'artillerie ; les villes et capitales défendent mieux.</p>
+      </div>
+      <div class="help-section">
+        <h3>💰 Économie</h3>
+        <p>Chaque tour vous gagnez 5💰 + 5/ville + 12/capitale. Recrutement : infanterie 10💰, blindés 25💰, artillerie 30💰, aviation 40💰.</p>
+      </div>
+      <div class="help-section">
+        <h3>📱 Carte</h3>
+        <p>Pincez pour zoomer, faites glisser pour vous déplacer. Boutons + / − / ⊙ pour zoomer/recentrer.</p>
+      </div>
+      <div class="modal-actions">
+        <button id="h-back">Retour</button>
+      </div>
+    `);
+    document.getElementById('h-back').addEventListener('click', () => this.showMenu());
+  },
+
   drawCountries() {
     const layer = document.getElementById('layer-countries');
     for (const [cid, path] of Object.entries(EUROPE_PATHS)) {
@@ -592,6 +645,28 @@ const ui = {
       el.setAttribute('data-country', cid);
       el.setAttribute('fill', (COUNTRIES[cid] || COUNTRIES.neutral).color);
       layer.appendChild(el);
+    }
+    this.drawSeaLabels();
+  },
+
+  drawSeaLabels() {
+    const layer = document.getElementById('layer-countries');
+    const seas = [
+      { name: 'Océan Atlantique',  x: 130, y: 470, rot: -10 },
+      { name: 'Mer du Nord',       x: 410, y: 290, rot: 0 },
+      { name: 'Mer Baltique',      x: 610, y: 240, rot: -20 },
+      { name: 'Mer Méditerranée',  x: 520, y: 720, rot: 0 },
+      { name: 'Mer Noire',         x: 800, y: 480, rot: -10 },
+      { name: 'Mer de Norvège',    x: 350, y: 110, rot: -15 },
+    ];
+    for (const s of seas) {
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('class', 'sea-label');
+      t.setAttribute('x', s.x);
+      t.setAttribute('y', s.y);
+      t.setAttribute('transform', `rotate(${s.rot} ${s.x} ${s.y})`);
+      t.textContent = s.name;
+      layer.appendChild(t);
     }
   },
 
@@ -626,22 +701,45 @@ const ui = {
       g.setAttribute('data-id', c.id);
       g.setAttribute('transform', `translate(${c.x} ${c.y})`);
 
-      const radius = c.capital ? 18 : 14;
+      const radius = c.capital ? 10 : 8;
+      // invisible hit area pour faciliter le tap mobile
+      const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      hit.setAttribute('r', Math.max(radius + 12, 20));
+      hit.setAttribute('fill', 'transparent');
+      hit.setAttribute('class', 'city-hit');
+      g.appendChild(hit);
+
+      // Ombre portée pour faire ressortir le marqueur
+      const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+      shadow.setAttribute('cx', 1.2);
+      shadow.setAttribute('cy', 2);
+      shadow.setAttribute('rx', radius + 1);
+      shadow.setAttribute('ry', radius + 1);
+      shadow.setAttribute('class', 'city-shadow');
+      g.appendChild(shadow);
+
+      // Anneau extérieur (blanc / or pour capitale)
+      const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      ring.setAttribute('r', radius + 0.5);
+      ring.setAttribute('class', 'city-ring');
+      g.appendChild(ring);
+
+      // Disque intérieur coloré (couleur du pays propriétaire)
       const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      circ.setAttribute('r', radius);
+      circ.setAttribute('r', radius - 1);
       circ.setAttribute('class', 'city-fill');
       circ.setAttribute('data-circle', c.id);
       g.appendChild(circ);
 
       if (c.capital) {
-        // étoile décorative
+        // étoile au-dessus
         const star = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
         const pts = [];
-        const sr = 6;
+        const sr = 5;
         for (let i = 0; i < 10; i++) {
           const r = (i % 2 === 0) ? sr : sr/2.3;
           const ang = (Math.PI/5) * i - Math.PI/2;
-          pts.push(`${(Math.cos(ang)*r).toFixed(1)},${(Math.sin(ang)*r - radius - 8).toFixed(1)}`);
+          pts.push(`${(Math.cos(ang)*r).toFixed(1)},${(Math.sin(ang)*r - radius - 7).toFixed(1)}`);
         }
         star.setAttribute('points', pts.join(' '));
         star.setAttribute('class', 'capital-star');
@@ -667,7 +765,7 @@ const ui = {
       labelG.setAttribute('transform', `translate(${c.x} ${c.y})`);
       const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       lbl.setAttribute('class', 'city-label' + (c.capital ? ' capital' : ''));
-      lbl.setAttribute('y', -(radius + 10));
+      lbl.setAttribute('y', -(radius + 7));
       lbl.textContent = c.name;
       labelG.appendChild(lbl);
       labelLayer.appendChild(labelG);
@@ -1085,14 +1183,34 @@ const ui = {
 // ==========================================================================
 // BOOT
 // ==========================================================================
-document.addEventListener('DOMContentLoaded', () => {
-  initState();
-  ui.init();
-  camera.init();
-  ui.refresh();
-  state.phase = 'choose';
-  ui.showCountrySelect();
-});
+function boot() {
+  try {
+    initState();
+    ui.init();
+    camera.init();
+    ui.refresh();
+    state.phase = 'choose';
+    // Délai pour s'assurer que le rendu DOM est terminé avant d'afficher la modale
+    setTimeout(() => {
+      try { ui.showCountrySelect(); }
+      catch (err) {
+        console.error('showCountrySelect failed:', err);
+        ui.toast('Erreur d\'init : utilisez le menu ☰ pour démarrer', 'danger', 4000);
+      }
+    }, 50);
+  } catch (err) {
+    console.error('Boot failed:', err);
+    document.body.innerHTML += `<div style="position:fixed;bottom:0;left:0;right:0;background:#c33;color:#fff;padding:12px;z-index:9999;font:13px sans-serif">
+      Erreur de chargement : ${err.message}. Rechargez la page.
+    </div>`;
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
 
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('dblclick', e => e.preventDefault());
