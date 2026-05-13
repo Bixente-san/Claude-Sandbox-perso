@@ -17,14 +17,15 @@ const UNIT_ORDER = ['inf', 'tank', 'art', 'air'];
 
 // Palette : tons terreux et désaturés pour un rendu carte ancienne / topographique
 const COUNTRIES = {
-  fr:      { name: 'France',     color: '#5a7da0', short: 'FR' },
-  de:      { name: 'Allemagne',  color: '#6e6e7e', short: 'DE' },
-  uk:      { name: 'R-U',        color: '#a05858', short: 'UK' },
-  it:      { name: 'Italie',     color: '#7a9c6e', short: 'IT' },
-  sp:      { name: 'Espagne',    color: '#b89548', short: 'ES' },
-  ru:      { name: 'URSS',       color: '#9c5040', short: 'RU' },
-  tu:      { name: 'Turquie',    color: '#8a6aa8', short: 'TR' },
-  // Neutres : ocres/sables/olives variés mais sourds
+  fr:      { name: 'France',         color: '#5a7da0', short: 'FR' },
+  de:      { name: 'Allemagne',      color: '#6e6e7e', short: 'DE' },
+  uk:      { name: 'R-U',            color: '#a05858', short: 'UK' },
+  it:      { name: 'Italie',         color: '#7a9c6e', short: 'IT' },
+  sp:      { name: 'Espagne',        color: '#b89548', short: 'ES' },
+  ru:      { name: 'URSS',           color: '#9c5040', short: 'RU' },
+  tu:      { name: 'Turquie',        color: '#8a6aa8', short: 'TR' },
+  ah:      { name: 'Autriche-Hongrie', color: '#c2a060', short: 'AH' },  // WW1 uniquement
+  // Pays neutres (ocres / sables / ardoises)
   ir: { name: 'Irlande',     color: '#7a9070' },
   pt: { name: 'Portugal',    color: '#b07852' },
   ch: { name: 'Suisse',      color: '#988470' },
@@ -55,11 +56,136 @@ const COUNTRIES = {
   lv: { name: 'Lettonie',    color: '#80909a' },
   lt: { name: 'Lituanie',    color: '#86949c' },
   md: { name: 'Moldavie',    color: '#988a6a' },
+  br: { name: 'Biélorussie', color: '#8a7c60' },
+  ua: { name: 'Ukraine',     color: '#a8884c' },
   // Owner spécial
   neutral: { name: 'Neutre', color: '#7a8092' },
 };
 
-const PLAYABLE = ['fr', 'de', 'uk', 'it', 'sp', 'ru', 'tu'];
+// Helper: couleur d'un pays avec fallback safe
+function countryColor(id) { return (COUNTRIES[id] || COUNTRIES.neutral).color; }
+function countryName(id) {
+  const sc = state.scenario && SCENARIOS[state.scenario];
+  return (sc && sc.countryNames && sc.countryNames[id])
+      || (COUNTRIES[id] || COUNTRIES.neutral).name;
+}
+
+// Régions géographiques (paths SVG) dont le code ne correspond pas à une ville
+// avec country=ce-code. On utilise une "ville-tracker" pour déterminer la couleur.
+const REGION_TRACKER = {
+  br: 'minsk',     // Biélorussie : suit Minsk
+  ua: 'kiev',      // Ukraine : suit Kiev
+  lv: 'riga',      // Lettonie : suit Riga
+  // Pour les autres régions, CITIES_BY_COUNTRY suffit
+};
+
+// ==========================================================================
+// SCÉNARIOS (WW1 1914 / WW2 1939)
+// ==========================================================================
+// Chaque scénario définit :
+//   - playable : liste des puissances jouables
+//   - countryNames : noms affichés (ex 'Russie' en 1914, 'URSS' en 1939)
+//   - cityOverrides : par city-id, { owner, init } écrasant les valeurs par défaut
+const SCENARIOS = {
+  ww2: {
+    name: 'Seconde Guerre mondiale',
+    year: '1939',
+    desc: 'Allemagne en pointe · URSS à l\'Est · neutres ailleurs',
+    playable: ['fr', 'de', 'uk', 'it', 'sp', 'ru', 'tu'],
+    countryNames: { ru: 'URSS', tu: 'Turquie' },
+    // Les valeurs par défaut de CITIES correspondent déjà à 1939 ; rien à écraser
+    cityOverrides: {},
+  },
+  ww1: {
+    name: 'Première Guerre mondiale',
+    year: '1914',
+    desc: 'Empires centraux contre Triple-Entente',
+    playable: ['fr', 'de', 'uk', 'it', 'ru', 'ah', 'tu'],
+    countryNames: { ru: 'Russie', tu: 'Empire ottoman', ah: 'Autriche-Hongrie' },
+    cityOverrides: {
+      // === France ===
+      paris:      { owner: 'fr', init: { inf: 5, art: 3 } },
+      bordeaux:   { owner: 'fr', init: { inf: 2 } },
+      lyon:       { owner: 'fr', init: { inf: 2 } },
+      marseille:  { owner: 'fr', init: { inf: 2 } },
+      lille:      { owner: 'fr', init: { inf: 3, art: 1 } },
+      strasbg:    { owner: 'de', init: { inf: 2, art: 1 } },   // Alsace allemande
+      // === Allemagne (Empire allemand) ===
+      berlin:     { owner: 'de', init: { inf: 5, art: 4, air: 1 } },
+      hamburg:    { owner: 'de', init: { inf: 2 } },
+      munich:     { owner: 'de', init: { inf: 3, art: 1 } },
+      cologne:    { owner: 'de', init: { inf: 2 } },
+      frankfurt:  { owner: 'de', init: { inf: 2 } },
+      leipzig:    { owner: 'de', init: { inf: 2 } },
+      gdansk:     { owner: 'de', init: { inf: 1 } },           // Danzig
+      // === Royaume-Uni (avec Irlande) ===
+      london:     { owner: 'uk', init: { inf: 4, art: 3 } },
+      mancstr:    { owner: 'uk', init: { inf: 2 } },
+      glasgow:    { owner: 'uk', init: { inf: 2 } },
+      dublin:     { owner: 'uk', init: { inf: 2 } },           // Irlande sous UK en 1914
+      // === Italie ===
+      rome:       { owner: 'it', init: { inf: 4, art: 2 } },
+      milan:      { owner: 'it', init: { inf: 2 } },
+      napoli:     { owner: 'it', init: { inf: 2 } },
+      venice:     { owner: 'it', init: { inf: 1 } },
+      torino:     { owner: 'it', init: { inf: 1 } },
+      // === Russie (Empire tsariste) ===
+      moscow:     { owner: 'ru', init: { inf: 6, art: 3 } },
+      leningrad:  { owner: 'ru', init: { inf: 3, art: 2 } },   // Pétrograd
+      kiev:       { owner: 'ru', init: { inf: 3, art: 1 } },
+      minsk:      { owner: 'ru', init: { inf: 2 } },
+      kharkov:    { owner: 'ru', init: { inf: 2 } },
+      odessa:     { owner: 'ru', init: { inf: 2, art: 1 } },
+      riga:       { owner: 'ru', init: { inf: 2 } },
+      helsinki:   { owner: 'ru', init: { inf: 1 } },           // Finlande russe
+      warsaw:     { owner: 'ru', init: { inf: 3, art: 1 } },   // Pologne russe
+      vilnius:    { owner: 'ru', init: { inf: 1 } },
+      tallinn:    { owner: 'ru', init: { inf: 1 } },
+      // === Autriche-Hongrie ===
+      vienna:     { owner: 'ah', init: { inf: 4, art: 2 } },
+      prague:     { owner: 'ah', init: { inf: 2 } },
+      bratislava: { owner: 'ah', init: { inf: 1 } },
+      budapest:   { owner: 'ah', init: { inf: 3, art: 1 } },
+      zagreb:     { owner: 'ah', init: { inf: 2 } },
+      sarajevo:   { owner: 'ah', init: { inf: 2 } },           // attentat 1914
+      krakow:     { owner: 'ah', init: { inf: 1 } },           // Galicie autrichienne
+      // === Empire ottoman ===
+      istanbul:   { owner: 'tu', init: { inf: 3, art: 1 } },
+      ankara:     { owner: 'tu', init: { inf: 2 } },
+      // === Espagne (neutre, désarmée) ===
+      madrid:     { owner: 'sp', init: { inf: 2 } },
+      barca:      { owner: 'sp', init: { inf: 1 } },
+      sevilla:    { owner: 'sp', init: { inf: 1 } },
+      bilbao:     { owner: 'sp', init: { inf: 1 } },
+      // === Portugal (Triple-Entente officiellement) ===
+      lisbon:     { owner: 'pt', init: { inf: 2 } },
+      // === Serbie (déclencheur de la guerre) ===
+      belgrade:   { owner: 'rs', init: { inf: 2, art: 1 } },
+      // === Roumanie / Bulgarie (neutres au début) ===
+      bucharest:  { owner: 'ro', init: { inf: 2 } },
+      sofia:      { owner: 'bu', init: { inf: 2 } },
+      // === Grèce (neutre puis Entente) ===
+      athens:     { owner: 'gr', init: { inf: 2 } },
+      thessalo:   { owner: 'gr', init: { inf: 1 } },
+      // === Albanie (indépendante depuis 1912) ===
+      tirana:     { owner: 'al', init: { inf: 1 } },
+      // === Pays-Bas, Belgique, Suisse, Scandinaves : neutres ===
+      amsterdam:  { owner: 'nl', init: { inf: 1 } },
+      rotterdam:  { owner: 'nl', init: { inf: 1 } },
+      brussels:   { owner: 'be', init: { inf: 2 } },
+      bern:       { owner: 'ch', init: { inf: 2 } },
+      zurich:     { owner: 'ch', init: { inf: 1 } },
+      oslo:       { owner: 'no', init: { inf: 1 } },
+      bergen:     { owner: 'no', init: { inf: 1 } },
+      stockholm:  { owner: 'sw', init: { inf: 2 } },
+      gborg:      { owner: 'sw', init: { inf: 1 } },
+      cphagen:    { owner: 'dk', init: { inf: 1 } },
+      reykjavik:  { owner: 'dk', init: { inf: 1 } },           // Islande sous Danemark
+    },
+  },
+};
+
+const PLAYABLE = ['fr', 'de', 'uk', 'it', 'sp', 'ru', 'tu', 'ah'];   // toutes puissances possibles, le scénario filtre
 
 // Maps
 const CITY_BY_ID = {};
@@ -78,34 +204,43 @@ const state = {
   turn: 1,
   phase: 'choose',            // 'choose' | 'play' | 'animating' | 'over'
   humanCountry: null,
+  scenario: 'ww2',            // 'ww1' | 'ww2'
   cities: {},                 // { id: { owner, garrison: {inf,tank,art,air}, hasActed, recruited } }
   gold: {},
   alive: {},
   selectedId: null,
 };
 
-function initState() {
+function initState(scenarioId) {
+  const scn = SCENARIOS[scenarioId] || SCENARIOS.ww2;
+  state.scenario = SCENARIOS[scenarioId] ? scenarioId : 'ww2';
   state.turn = 1;
   state.phase = 'play';
   state.selectedId = null;
   state.cities = {};
   for (const c of CITIES) {
+    const ov = scn.cityOverrides[c.id];
+    const owner = (ov && ov.owner) ? ov.owner : c.country;
+    const init = (ov && ov.init) ? ov.init : c.init;
     state.cities[c.id] = {
-      owner: c.country,
+      owner: owner,
       garrison: {
-        inf:  c.init.inf  || 0,
-        tank: c.init.tank || 0,
-        art:  c.init.art  || 0,
-        air:  c.init.air  || 0,
+        inf:  init.inf  || 0,
+        tank: init.tank || 0,
+        art:  init.art  || 0,
+        air:  init.air  || 0,
       },
       hasActed: false,
       recruited: false,
     };
   }
+  // Puissances vivantes / dotées d'or : celles du scénario
   state.gold = {};
-  PLAYABLE.forEach(c => state.gold[c] = 60);
   state.alive = {};
-  PLAYABLE.forEach(c => state.alive[c] = true);
+  for (const c of scn.playable) {
+    state.gold[c] = 60;
+    state.alive[c] = true;
+  }
 }
 
 // ==========================================================================
@@ -155,6 +290,11 @@ function rng(min, max) { return Math.random() * (max - min) + min; }
 
 // Owner d'un PAYS (par majorité des villes possédées sur son territoire historique)
 function countryDominator(countryId) {
+  // Override : régions sans city.country correspondant, on suit une ville-tracker
+  if (REGION_TRACKER[countryId]) {
+    const trackerId = REGION_TRACKER[countryId];
+    if (state.cities[trackerId]) return state.cities[trackerId].owner;
+  }
   const homeCities = CITIES_BY_COUNTRY[countryId] || [];
   if (homeCities.length === 0) return null;
   const counts = {};
@@ -596,11 +736,9 @@ const ui = {
     `);
     document.getElementById('m-new').addEventListener('click', () => {
       this.hideModal();
-      initState();
       state.phase = 'choose';
       camera.reset();
-      this.refresh();
-      this.showCountrySelect();
+      this.showScenarioSelect();
     });
     document.getElementById('m-help').addEventListener('click', () => this.showHelp());
     document.getElementById('m-close').addEventListener('click', () => this.hideModal());
@@ -776,7 +914,7 @@ const ui = {
     // top bar
     document.getElementById('ui-turn').textContent = 'T' + state.turn;
     const country = state.humanCountry;
-    document.getElementById('ui-country').textContent = country ? COUNTRIES[country].name : '-';
+    document.getElementById('ui-country').textContent = country ? countryName(country) : '-';
     document.getElementById('ui-gold').textContent = country ? state.gold[country] : '0';
     document.getElementById('ui-cities').textContent =
       country ? ownedCities(country).length + '/' + CITIES.length : '0';
@@ -786,7 +924,7 @@ const ui = {
       const path = document.querySelector(`.country[data-country="${cid}"]`);
       if (!path) continue;
       const dom = countryDominator(cid);
-      const baseColor = dom ? (COUNTRIES[dom] || COUNTRIES.neutral).color : COUNTRIES[cid].color;
+      const baseColor = countryColor(dom || cid);
       path.setAttribute('fill', baseColor);
     }
 
@@ -853,9 +991,8 @@ const ui = {
 
     const c = CITY_BY_ID[state.selectedId];
     const s = state.cities[state.selectedId];
-    const co = COUNTRIES[s.owner] || COUNTRIES.neutral;
     nameEl.innerHTML = c.name + (c.capital ? ' ★' : '');
-    flagEl.innerHTML = `<span class="owner-tag" style="background:${co.color}">${co.name}</span>`;
+    flagEl.innerHTML = `<span class="owner-tag" style="background:${countryColor(s.owner)}">${countryName(s.owner)}</span>`;
 
     for (const t of UNIT_ORDER) {
       document.getElementById('g-' + t).textContent = s.garrison[t] || 0;
@@ -967,7 +1104,6 @@ const ui = {
     const to = state.cities[toId];
     const fromName = CITY_BY_ID[fromId].name;
     const toName = CITY_BY_ID[toId].name;
-    const toOwner = COUNTRIES[to.owner] || COUNTRIES.neutral;
 
     const titleIcon = friendly ? '➜' : '⚔️';
     const action = friendly ? 'Déplacer' : 'Attaquer';
@@ -988,7 +1124,7 @@ const ui = {
     let defenseInfo = '';
     if (!friendly) {
       const dPow = Math.round(calcDefense(to.garrison, !!CITY_BY_ID[toId].capital));
-      defenseInfo = `<p style="font-size:12px">Défenseurs: ${COUNTRIES[to.owner]?.name || 'Neutre'} — puissance défensive ~<strong>${dPow}</strong>${CITY_BY_ID[toId].capital?' (capitale fortifiée)':''}</p>`;
+      defenseInfo = `<p style="font-size:12px">Défenseurs: ${countryName(to.owner)} — puissance défensive ~<strong>${dPow}</strong>${CITY_BY_ID[toId].capital?' (capitale fortifiée)':''}</p>`;
     }
 
     this.showModal(`
@@ -1113,26 +1249,58 @@ const ui = {
     this._toastTimer = setTimeout(() => el.classList.add('hidden'), dur || 1500);
   },
 
+  showScenarioSelect() {
+    const cards = Object.entries(SCENARIOS).map(([id, sc]) => `
+      <div class="scenario-card" data-scenario="${id}">
+        <div class="sc-year">${sc.year}</div>
+        <div class="sc-name">${sc.name}</div>
+        <div class="sc-desc">${sc.desc}</div>
+        <div class="sc-powers">${sc.playable.length} puissances</div>
+      </div>`).join('');
+    this.showModal(`
+      <h1>⚔️ Europa Conquest</h1>
+      <p class="subtitle">Choisissez l'époque</p>
+      <div class="scenario-grid">${cards}</div>
+    `);
+    document.querySelectorAll('.scenario-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.scenario;
+        initState(id);
+        this.refresh();
+        this.showCountrySelect();
+      });
+    });
+  },
+
   showCountrySelect() {
-    const cards = PLAYABLE.map(id => {
-      const co = COUNTRIES[id];
-      const cities = CITIES.filter(c => c.country === id);
-      const totalArm = cities.reduce((s, c) => s + (c.init.inf||0)+(c.init.tank||0)+(c.init.art||0)+(c.init.air||0), 0);
+    const scn = SCENARIOS[state.scenario];
+    // Calcul des stats par pays selon les owners actuels après initState
+    const cards = scn.playable.map(id => {
+      const co = COUNTRIES[id] || COUNTRIES.neutral;
+      const name = (scn.countryNames && scn.countryNames[id]) || co.name;
+      const owned = CITIES.filter(c => state.cities[c.id].owner === id);
+      const totalArm = owned.reduce((s, c) => {
+        const g = state.cities[c.id].garrison;
+        return s + g.inf + g.tank + g.art + g.air;
+      }, 0);
       return `
         <div class="country-card" data-country="${id}">
           <div class="color-chip" style="background:${co.color}"></div>
-          <div>${co.name}</div>
-          <div class="difficulty">${cities.length} villes • ${totalArm} unités</div>
+          <div>${name}</div>
+          <div class="difficulty">${owned.length} villes • ${totalArm} unités</div>
         </div>`;
     }).join('');
     this.showModal(`
       <h1>⚔️ Europa Conquest</h1>
-      <p class="subtitle">Choisissez votre puissance · 1939</p>
+      <p class="subtitle">Choisissez votre puissance · ${scn.year}</p>
       <div class="country-grid">${cards}</div>
       <p style="font-size:11px;color:#8090b0;text-align:center;line-height:1.45">
         Conquérez les villes ennemies. Perdez votre capitale = défaite. <br>
-        Domination = 60% des villes d'Europe.
+        Domination = 60 % des villes d'Europe.
       </p>
+      <div class="modal-actions">
+        <button id="cs-back" style="background:#444">← Changer d'époque</button>
+      </div>
     `);
     document.querySelectorAll('.country-card').forEach(card => {
       card.addEventListener('click', () => {
@@ -1140,15 +1308,17 @@ const ui = {
         state.humanCountry = id;
         state.phase = 'play';
         this.hideModal();
-        this.toast(`Vous dirigez ${COUNTRIES[id].name}`, 'success', 1400);
+        this.toast(`Vous dirigez ${countryName(id)}`, 'success', 1400);
         this.refresh();
       });
     });
+    document.getElementById('cs-back').addEventListener('click', () => this.showScenarioSelect());
   },
 
   showGameOver(result) {
-    const scores = PLAYABLE.map(c => ({
-      id: c, name: COUNTRIES[c].name, color: COUNTRIES[c].color,
+    const scn = SCENARIOS[state.scenario];
+    const scores = scn.playable.map(c => ({
+      id: c, name: countryName(c), color: countryColor(c),
       cities: ownedCities(c).length, alive: state.alive[c],
     })).sort((a, b) => b.cities - a.cities);
     const rows = scores.map(s => `
@@ -1171,11 +1341,9 @@ const ui = {
     `);
     document.getElementById('go-restart').addEventListener('click', () => {
       this.hideModal();
-      initState();
       state.phase = 'choose';
       camera.reset();
-      this.showCountrySelect();
-      this.refresh();
+      this.showScenarioSelect();
     });
   },
 };
@@ -1185,16 +1353,15 @@ const ui = {
 // ==========================================================================
 function boot() {
   try {
-    initState();
+    initState('ww2');                  // état par défaut, le picker peut tout réinitialiser
     ui.init();
     camera.init();
     ui.refresh();
     state.phase = 'choose';
-    // Délai pour s'assurer que le rendu DOM est terminé avant d'afficher la modale
     setTimeout(() => {
-      try { ui.showCountrySelect(); }
+      try { ui.showScenarioSelect(); }
       catch (err) {
-        console.error('showCountrySelect failed:', err);
+        console.error('showScenarioSelect failed:', err);
         ui.toast('Erreur d\'init : utilisez le menu ☰ pour démarrer', 'danger', 4000);
       }
     }, 50);
